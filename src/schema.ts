@@ -1,5 +1,5 @@
 import { Ctx, makeCtx } from "./context";
-import { Issue } from "./errors";
+import { Issue, issueInvalidType } from "./errors";
 import { Result } from "./result";
 
 export interface Schema<I, O = I> {
@@ -21,4 +21,18 @@ export function is<S extends Schema<any, any>>(schema: S, data: unknown): data i
 	const ctx = makeCtx();
 
 	return schema._parse(data, ctx).isOk();
+}
+
+export function CreateTypeOf<T extends keyof CheckableTypes>(typeName: T) {
+	return function (): Schema<T> {
+		return {
+			kind: typeName,
+			_parse(data, ctx) {
+				if (typeIs(data, typeName)) return ctx.ok(data);
+
+				ctx.push(issueInvalidType(typeName, typeOf(data), ctx.path));
+				return ctx.err([]);
+			},
+		};
+	};
 }
