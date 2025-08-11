@@ -2,6 +2,7 @@ import Obj from "@rbxts/object-utils";
 import { Issue, issueInvalidType } from "../errors";
 import type { InferInput, InferOutput, Schema, Shape } from "../schema";
 import { Result } from "../result";
+import { Ctx } from "../context";
 
 type InputFromShape<S extends Shape> = { [K in keyof S]: InferInput<S[K]> };
 
@@ -28,7 +29,9 @@ export function Object<S extends Shape>(shape: S): Schema<InputFromShape<S>, Out
 				assert("_parse" in schema);
 				assert(typeIs(schema["_parse"], "function"));
 
-				const res = schema._parse(value, child) as Result<unknown, Issue[]>;
+				const sch = schema as unknown as { _parse(data: unknown, ctx: Ctx): Result<unknown, Issue[]> };
+
+				const res = sch._parse(value, child) as Result<unknown, Issue[]>;
 
 				if (res.isOk()) {
 					out[k as string | number] = res.unwrap();
@@ -69,7 +72,9 @@ export function StrictObject<S extends Shape>(shape: S): Schema<InputFromShape<S
 				assert("_parse" in sch);
 				assert(typeIs(sch["_parse"], "function"));
 
-				const res = sch._parse(value, child) as Result<unknown, Issue[]>;
+				const schema = sch as unknown as { _parse(data: unknown, ctx: Ctx): Result<unknown, Issue[]> };
+
+				const res = schema._parse(value, child) as Result<unknown, Issue[]>;
 
 				if (res.isOk()) {
 					out[k as string | number] = res.unwrap();
