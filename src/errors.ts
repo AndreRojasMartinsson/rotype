@@ -27,3 +27,7 @@ export class RoTypeError {
 		this.name = "RoTypeError";
 	}
 }
+
+export function issueInvalidType(expected: string, recieved: string, path: Path): Issue {
+	return { code: "invalid_type", message: `Expected ${expected}, got ${recieved}`, path };
+}
