@@ -196,7 +196,7 @@ export function Merge<A extends Schema<Record<string, any>, any>, B extends Sche
 	};
 }
 
-export function Enum<T extends readonly string[]>(values: T): Schema<T[number]> {
+export function Enumerations<T extends readonly string[]>(values: T): Schema<T[number]> {
 	const set = new Set<string>(values as unknown as Array<string>);
 	return {
 		kind: "enum",
