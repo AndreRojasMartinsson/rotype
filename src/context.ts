@@ -1,13 +1,12 @@
 import { Issue, Path } from "./errors";
-
-export type Result<T> = { ok: true; val: T } | { ok: false; issues: Issue[] };
+import { Result } from "./result";
 
 export interface Ctx {
 	path: Path;
 	push(issue: Issue): void;
 	child(key: string | number): Ctx;
-	ok<T>(val: T): { ok: true; val: T };
-	err(issues: Issue[]): { ok: false; issues: Issue[] };
+	ok<T>(val: T): Result<T, Issue[]>;
+	err(issues: Issue[]): Result<defined, Issue[]>;
 }
 
 export function makeCtx(basePath: Path = []): Ctx {
@@ -21,10 +20,10 @@ export function makeCtx(basePath: Path = []): Ctx {
 			return makeCtx([...basePath, key]);
 		},
 		ok(val) {
-			return { ok: true as const, val };
+			return Result.ok(val);
 		},
 		err(_) {
-			return { ok: false as const, issues: collected.size() > 0 ? collected : _ };
+			return Result.err(collected.size() > 0 ? collected : _);
 		},
 	};
 
