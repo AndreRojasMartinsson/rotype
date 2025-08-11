@@ -161,13 +161,13 @@ export function Intersection<A extends Schema<any, any>, B extends Schema<any, a
 			if (!r1.isOk()) return r1;
 			const r2 = b._parse(data, ctx);
 			if (!r2.isOk()) return r2;
-			const v1 = r1.unwrap();
-			const v2 = r2.unwrap();
+			const v1 = r1.unwrap() as unknown[];
+			const v2 = r2.unwrap() as unknown[];
 
 			if (typeOf(v1) === "table" && typeOf(v2) === "table") {
 				const out: Record<string, unknown> = {};
-				for (const [k, v] of pairs(v1)) out[k as string] = v;
-				for (const [k, v] of pairs(v2)) out[k as string] = v;
+				for (const [k, v] of pairs(v1)) out[k as unknown as string] = v;
+				for (const [k, v] of pairs(v2)) out[k as unknown as string] = v;
 				return ctx.ok(out);
 			}
 			// default: prefer second schema's value
@@ -191,7 +191,7 @@ export function Merge<A extends Schema<Record<string, any>, any>, B extends Sche
 			const out: Record<string, unknown> = {};
 			for (const [k, v] of pairs(r1.unwrap() as Record<string, unknown>)) out[k as string] = v;
 			for (const [k, v] of pairs(r2.unwrap() as Record<string, unknown>)) out[k as string] = v; // right wins
-			return ctx.ok(out as any);
+			return ctx.ok(out);
 		},
 	};
 }

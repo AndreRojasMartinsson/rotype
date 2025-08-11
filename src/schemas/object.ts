@@ -1,6 +1,7 @@
 import Obj from "@rbxts/object-utils";
-import { issueInvalidType } from "../errors";
+import { Issue, issueInvalidType } from "../errors";
 import type { InferInput, InferOutput, Schema, Shape } from "../schema";
+import { Result } from "../result";
 
 type InputFromShape<S extends Shape> = { [K in keyof S]: InferInput<S[K]> };
 
@@ -18,19 +19,19 @@ export function Object<S extends Shape>(shape: S): Schema<InputFromShape<S>, Out
 			const out: Record<string, unknown> = {};
 			let ok = true;
 			for (const [k, schema] of pairs(shape)) {
-				assert(typeIs(k, "string"), "Key must be a string or number");
-				assert(typeIs(k, "number"), "Key must be a string or number");
+				// assert(typeIs(k, "string"), "Key must be a string or number");
+				// assert(typeIs(k, "number"), "Key must be a string or number");
 
-				const child = ctx.child(k);
-				const value = (data as Record<string, unknown>)[k];
+				const child = ctx.child(k as string | number);
+				const value = (data as Record<string, unknown>)[k as string | number];
 
 				assert("_parse" in schema);
 				assert(typeIs(schema["_parse"], "function"));
 
-				const res = schema._parse(value, child);
+				const res = schema._parse(value, child) as Result<unknown, Issue[]>;
 
 				if (res.isOk()) {
-					out[k] = res.unwrap();
+					out[k as string | number] = res.unwrap();
 				} else {
 					ok = false;
 					for (const issue of res.unwrapErr()) ctx.push(issue);
@@ -59,19 +60,19 @@ export function StrictObject<S extends Shape>(shape: S): Schema<InputFromShape<S
 			const out: Record<string, unknown> = {};
 			let ok = true;
 			for (const [k, sch] of pairs(shape)) {
-				assert(typeIs(k, "string"), "Key must be a string or number");
-				assert(typeIs(k, "number"), "Key must be a string or number");
+				// assert(typeIs(k, "string"), "Key must be a string or number");
+				// assert(typeIs(k, "number"), "Key must be a string or number");
 
-				const child = ctx.child(k);
-				const value = (data as Record<string, unknown>)[k];
-
+				const child = ctx.child(k as string | number);
+				const value = (data as Record<string, unknown>)[k as string | number];
+				//
 				assert("_parse" in sch);
 				assert(typeIs(sch["_parse"], "function"));
 
-				const res = sch._parse(value, child);
+				const res = sch._parse(value, child) as Result<unknown, Issue[]>;
 
 				if (res.isOk()) {
-					out[k] = res.unwrap();
+					out[k as string | number] = res.unwrap();
 				} else {
 					ok = false;
 					for (const issue of res.unwrapErr()) ctx.push(issue);
