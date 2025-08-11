@@ -15,7 +15,6 @@ export function Array<T extends Schema<any, any>>(item: T): Schema<Array<InferIn
 			for (const [idx, val] of ipairs(data as Array<unknown>)) {
 				const child = ctx.child(idx - 1); // zero-based for TS ergonomics
 				const res = item._parse(val, child);
-				if (res.isOk()) out[i] = res.unwrap();
 
 				if (res.isOk()) {
 					out[i] = res.unwrap();
@@ -29,6 +28,40 @@ export function Array<T extends Schema<any, any>>(item: T): Schema<Array<InferIn
 			}
 
 			return ok ? ctx.ok(out as Array<InferOutput<T>>) : ctx.err([]);
+		},
+	};
+}
+
+export function Tuple<T extends Schema<any, any>[]>(
+	...items: T
+): Schema<{ [K in keyof T]: InferInput<T[K]> }, { [K in keyof T]: InferOutput<T[K]> }> {
+	return {
+		kind: "tuple",
+		_parse(data, ctx) {
+			if (typeOf(data) !== "table") {
+				ctx.push(issueInvalidType("tuple", typeOf(data), ctx.path));
+				return ctx.err([]);
+			}
+
+			const out: unknown[] = [];
+			let i = 0;
+			let ok = true;
+			for (const [idx, val] of ipairs(data as Array<unknown>)) {
+				const child = ctx.child(idx - 1);
+				const item = items[idx];
+				const res = item._parse(val, child);
+
+				if (res.isOk()) {
+					out[i] = res.unwrap();
+				} else {
+					ok = false;
+					for (const issue of res.unwrapErr()) ctx.push(issue);
+				}
+
+				i++;
+			}
+
+			return ok ? ctx.ok(out as { [K in keyof T]: InferOutput<T[K]> }) : ctx.err([]);
 		},
 	};
 }

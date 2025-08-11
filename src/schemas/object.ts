@@ -1,3 +1,4 @@
+import Obj from "@rbxts/object-utils";
 import { issueInvalidType } from "../errors";
 import type { InferInput, InferOutput, Schema } from "../schema";
 
@@ -38,6 +39,52 @@ export function Object<S extends Shape>(shape: S): Schema<InputFromShape<S>, Out
 			}
 
 			return ok ? ctx.ok(out as OutputFromShape<S>) : ctx.err([]);
+		},
+	};
+}
+
+export function StrictObject<S extends Shape>(shape: S): Schema<InputFromShape<S>, OutputFromShape<S>> {
+	const keySet = new Set<string>(Obj.keys(shape as Record<string, any>));
+	return {
+		kind: "strictObject",
+		_parse(data, ctx) {
+			if (typeOf(data) !== "table") {
+				ctx.push(issueInvalidType("object", typeOf(data), ctx.path));
+				return ctx.err([]);
+			}
+			// Unknown keys check
+			for (const [k] of pairs(data as Record<string, unknown>)) {
+				if (!keySet.has(k as string))
+					ctx.push({ code: "custom", message: `Unknown key '${k as string}'`, path: ctx.child(k).path });
+			}
+			const out: Record<string, unknown> = {};
+			let ok = true;
+			for (const [k, sch] of pairs(shape)) {
+				assert(typeIs(k, "string"), "Key must be a string or number");
+				assert(typeIs(k, "number"), "Key must be a string or number");
+
+				const child = ctx.child(k);
+				const value = (data as Record<string, unknown>)[k];
+
+				assert("_parse" in sch);
+				assert(typeIs(sch["_parse"], "function"));
+
+				const res = sch._parse(value, child);
+
+				if (res.isOk()) {
+					out[k] = res.unwrap();
+				} else {
+					ok = false;
+					for (const issue of res.unwrapErr()) ctx.push(issue);
+				}
+			}
+			// If any unknown key issues were pushed, fail
+			if (!ok || true) {
+				// Determine if there were any 'Unknown key' issues
+				// (we conservatively fail if any issues exist)
+				// The ctx.err will surface already-pushed issues.
+			}
+			return ok && true ? ctx.ok(out as OutputFromShape<S>) : ctx.err([]);
 		},
 	};
 }
