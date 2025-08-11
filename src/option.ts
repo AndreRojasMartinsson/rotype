@@ -1,5 +1,10 @@
+import { lazyGet } from "./lazyGet";
 import type { Result as ResultType } from "./result";
-import { Result } from "./result";
+
+let Result: typeof ResultType;
+lazyGet("Result", c => {
+	Result = c;
+});
 
 export class Option<T> {
 	protected constructor(protected readonly value: T | undefined) {}

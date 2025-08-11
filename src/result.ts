@@ -1,5 +1,10 @@
+import { lazyGet } from "./lazyGet";
 import type { Option as OptionType } from "./option";
-import { Option } from "./option";
+
+let Option: typeof OptionType;
+lazyGet("Option", c => {
+	Option = c;
+});
 
 export interface UnitType {}
 
