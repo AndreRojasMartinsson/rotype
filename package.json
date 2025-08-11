@@ -1,16 +1,20 @@
 {
 	"name": "@rbxts/rotype",
-	"version": "1.0.0",
-	"description": "",
+	"version": "0.0.5",
+	"description": "Advanced runtime type checking library",
 	"main": "out/init.lua",
 	"scripts": {
 		"build": "rbxtsc",
 		"watch": "rbxtsc -w",
 		"prepublishOnly": "pnpm run build"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"keywords": [
+		"Runtime",
+		"Typechecking",
+		"Roblox"
+	],
+	"author": "AndreRojasMartinsson",
+	"license": "MIT",
 	"packageManager": "pnpm@10.11.1",
 	"types": "out/index.d.ts",
 	"files": [
@@ -40,4 +44,3 @@
 		"@rbxts/object-utils": "^1.0.4"
 	}
 }
-
