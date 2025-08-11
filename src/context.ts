@@ -6,7 +6,7 @@ export interface Ctx {
 	push(issue: Issue): void;
 	child(key: string | number): Ctx;
 	ok<T>(val: T): Result<T, Issue[]>;
-	err(issues: Issue[]): Result<defined, Issue[]>;
+	err(issues: Issue[]): Result<any, Issue[]>;
 }
 
 export function makeCtx(basePath: Path = []): Ctx {
