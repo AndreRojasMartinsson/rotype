@@ -2,8 +2,13 @@ import { Ctx, makeCtx } from "./context";
 import { Issue, issueInvalidType } from "./errors";
 import { Result } from "./result";
 
+export type Shape = { readonly [k: string]: Schema<any, any> };
+
 export interface Schema<I, O = I> {
 	kind: string;
+	shape?: Shape;
+	inner?: Schema<any, any>;
+	item?: Schema<any, any>;
 	_parse(data: unknown, ctx: Ctx): Result<O, Issue[]>;
 }
 

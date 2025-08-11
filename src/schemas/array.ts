@@ -4,6 +4,7 @@ import type { InferInput, InferOutput, Schema } from "../schema";
 export function Array<T extends Schema<any, any>>(item: T): Schema<Array<InferInput<T>>, Array<InferOutput<T>>> {
 	return {
 		kind: "array",
+		item,
 		_parse(data, ctx) {
 			if (typeOf(data) !== "table") {
 				ctx.push(issueInvalidType("array", typeOf(data), ctx.path));
@@ -94,6 +95,7 @@ export function Optional<S extends Schema<any, any>>(
 ): Schema<InferInput<S> | undefined, InferOutput<S> | undefined> {
 	return {
 		kind: "optional",
+		inner: schema,
 		_parse(data, ctx) {
 			if (data === undefined) return ctx.ok(undefined);
 			return schema._parse(data, ctx);

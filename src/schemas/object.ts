@@ -1,8 +1,6 @@
 import Obj from "@rbxts/object-utils";
 import { issueInvalidType } from "../errors";
-import type { InferInput, InferOutput, Schema } from "../schema";
-
-type Shape = { readonly [k: string]: Schema<any, any> };
+import type { InferInput, InferOutput, Schema, Shape } from "../schema";
 
 type InputFromShape<S extends Shape> = { [K in keyof S]: InferInput<S[K]> };
 
@@ -11,6 +9,7 @@ type OutputFromShape<S extends Shape> = { [K in keyof S]: InferOutput<S[K]> };
 export function Object<S extends Shape>(shape: S): Schema<InputFromShape<S>, OutputFromShape<S>> {
 	return {
 		kind: "object",
+		shape,
 		_parse(data, ctx) {
 			if (typeOf(data) !== "table") {
 				ctx.push(issueInvalidType("object", typeOf(data), ctx.path));

@@ -250,36 +250,37 @@ export function Abs(): Action<number, number> {
 }
 
 export function DeepPartial<S extends Schema<any, any>>(schema: S): Schema<any, any> {
-	if ((schema as any).shape) {
-		const shape = (schema as any).shape as Record<string, Schema<any, any>>;
+	if (schema.shape) {
+		const shape = schema.shape;
 		const newShape: Record<string, Schema<any, any>> = {};
 		for (const [k, v] of pairs(shape)) {
 			newShape[k] = Optional(DeepPartial(v));
 		}
-		return Object(newShape) as any;
+		return Object(newShape);
 	}
-	if ((schema as any).item) {
-		const item = (schema as any).item as Schema<any, any>;
-		return Array(DeepPartial(item)) as any;
+
+	if (schema.item) {
+		const item = schema.item;
+		return Array(DeepPartial(item));
 	}
 	return schema;
 }
 
 export function DeepRequired<S extends Schema<any, any>>(schema: S): Schema<any, any> {
-	if ((schema as any).shape) {
-		const shape = (schema as any).shape as Record<string, Schema<any, any>>;
+	if (schema.shape) {
+		const shape = schema.shape;
 		const newShape: Record<string, Schema<any, any>> = {};
 		for (const [k, v] of pairs(shape)) {
 			let inner = DeepRequired(v);
 			// strip optional
-			if (inner.kind === "optional") inner = (inner as any).schema ?? (inner as any);
+			if (inner.kind === "optional") inner = inner.inner ?? inner;
 			newShape[k] = inner;
 		}
-		return Object(newShape) as any;
+		return Object(newShape);
 	}
-	if ((schema as any).item) {
-		const item = (schema as any).item as Schema<any, any>;
-		return Array(DeepRequired(item)) as any;
+	if (schema.item) {
+		const item = schema.item;
+		return Array(DeepRequired(item));
 	}
 	return schema;
 }
